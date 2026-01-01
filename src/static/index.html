@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dissector - Visual Reasoning Tool</title>
+    <meta name="description" content="Interactive visual tool for creating and analyzing causal reasoning trees">
+
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- External dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js"></script>
+</head>
+
+<body>
+    <!-- Project Selector Screen -->
+    <div id="project-selector" class="screen">
+        <div class="selector-container">
+            <h1>Dissector</h1>
+            <p class="tagline">Visualize and explore causal reasoning</p>
+
+            <div class="project-actions">
+                <button id="create-new-project" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i>
+                    Create New Project
+                </button>
+            </div>
+
+            <div class="projects-list">
+                <h2>Recent Projects</h2>
+                <div id="projects-container">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Workspace Screen -->
+    <div id="project-workspace" class="screen hidden">
+        <!-- Header Area -->
+        <header class="workspace-header">
+            <button id="back-to-selector" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back
+            </button>
+
+            <div class="project-metadata">
+                <input type="text" id="project-name" class="editable-field field-large" placeholder="Project Name">
+                <input type="text" id="project-creator" class="editable-field field-medium" placeholder="Creator">
+                <input type="text" id="project-summary" class="editable-field field-medium" placeholder="Summary">
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="workspace-main">
+            <!-- Visualization Area -->
+            <div id="visualization-area" class="visualization-area">
+                <svg id="graph-svg"></svg>
+                <div id="empty-state" class="empty-state">
+                    <p>Double click anywhere to add an observation</p>
+                </div>
+            </div>
+
+            <!-- Right Panel (Detail View) -->
+            <div id="detail-panel" class="detail-panel hidden">
+                <button id="close-detail-panel" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+
+                <!-- Observation Detail View -->
+                <div id="observation-detail" class="detail-content hidden">
+                    <input type="text" id="detail-summary" class="editable-field field-large" placeholder="Summary">
+
+                    <div class="detail-section">
+                        <h3>Description</h3>
+                        <div id="detail-description" class="markdown-content"
+                            data-placeholder="Click to add description"></div>
+                        <textarea id="detail-description-edit" class="markdown-editor hidden"></textarea>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Attachments</h3>
+                        <ul id="detail-attachments" class="attachment-list"></ul>
+                        <button id="add-attachment" class="btn btn-small"><i class="fa-solid fa-plus"></i> Add
+                            File</button>
+                        <input type="file" id="attachment-file-input" class="hidden">
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Comments</h3>
+                        <div id="detail-comments" class="comments-list"></div>
+                        <button id="add-comment" class="btn btn-small"><i class="fa-solid fa-plus"></i> Add
+                            Comment</button>
+                    </div>
+
+                    <div class="detail-section collapsible">
+                        <h3>Solution</h3>
+                        <div id="detail-solution" class="markdown-content" data-placeholder="Click to add solution">
+                        </div>
+                        <textarea id="detail-solution-edit" class="markdown-editor hidden"></textarea>
+                    </div>
+
+                    <!-- Delete Observation Control -->
+                    <div id="delete-observation-control" class="delete-control">
+                        <button id="delete-observation-btn" class="btn-icon btn-delete"><i
+                                class="fa-solid fa-trash"></i></button>
+                        <span id="delete-observation-confirm-label" class="confirm-label hidden">Really delete?</span>
+                        <button id="delete-observation-cancel" class="btn-icon btn-cancel hidden"><i
+                                class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+
+                <!-- Link Detail View -->
+                <div id="link-detail" class="detail-content hidden">
+                    <div class="link-view">
+                        <div id="link-from-card" class="link-card"></div>
+                        <div class="link-connector">... which is why ...</div>
+                        <div id="link-to-card" class="link-card"></div>
+                    </div>
+
+                    <!-- Delete Link Control -->
+                    <div id="delete-link-control" class="delete-control">
+                        <button id="delete-link-btn" class="btn-icon btn-delete"><i
+                                class="fa-solid fa-trash"></i></button>
+                        <span id="delete-link-confirm-label" class="confirm-label hidden">Really delete?</span>
+                        <button id="delete-link-cancel" class="btn-icon btn-cancel hidden"><i
+                                class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Mode Dialog (for intermediate nodes) -->
+    <div id="delete-mode-dialog" class="modal hidden">
+        <div class="modal-content">
+            <h2>Delete Intermediate Node</h2>
+            <p>This observation has both causes and effects. How should the links be handled?</p>
+            <div class="modal-actions">
+                <button id="delete-mode-stretch" class="btn btn-primary">Stretch (Connect causes to effects)</button>
+                <button id="delete-mode-break" class="btn btn-secondary">Break (Remove all links)</button>
+                <button id="delete-mode-cancel" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Dialog -->
+    <div id="create-project-dialog" class="modal hidden">
+        <div class="modal-content">
+            <h2>Create New Project</h2>
+            <div class="form-group">
+                <label for="new-project-name">Project Name</label>
+                <input type="text" id="new-project-name" placeholder="Enter project name">
+            </div>
+            <div class="form-group">
+                <label for="new-project-creator">Creator</label>
+                <input type="text" id="new-project-creator" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="new-project-summary">Summary</label>
+                <input type="text" id="new-project-summary" placeholder="Brief description">
+            </div>
+            <div class="modal-actions">
+                <button id="confirm-create-project" class="btn btn-primary">Create</button>
+                <button id="cancel-create-project" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js" type="module"></script>
+</body>
+
+</html>
