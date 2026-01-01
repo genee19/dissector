@@ -437,11 +437,7 @@ body {
     transition: all var(--transition-fast);
 }
 
-.link-container:hover .link {
-    stroke: var(--color-primary);
-    stroke-width: 5px;
-}
-
+.link-container:hover .link,
 .link-container.selected .link {
     stroke: var(--color-primary);
     stroke-width: 5px;
@@ -457,8 +453,8 @@ body {
     cursor: pointer;
 }
 
-.arrowhead:hover,
-.arrowhead.selected {
+.link-container:hover .arrowhead,
+.link-container.selected .arrowhead {
     fill: var(--color-primary);
     stroke: var(--color-bg-dark);
 }

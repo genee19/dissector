@@ -112,11 +112,10 @@ export class Visualization {
     // Clear previous SVG elements
     this.svg.selectAll('g').remove();
 
-    // Create SVG groups for links and arrowheads only
+    // Create SVG group for links only
     const linkGroup = this.svg.append('g').attr('class', 'links');
-    const arrowGroup = this.svg.append('g').attr('class', 'arrowheads');
 
-    // Render links as double lines
+    // Render links as double lines with arrowheads inside each container
     const linkContainers = linkGroup.selectAll('.link-container')
       .data(links)
       .enter()
@@ -135,16 +134,9 @@ export class Visualization {
     const linkElements2 = linkContainers.append('path')
       .attr('class', 'link link-track-2');
 
-    // Render chevron arrowheads as filled polygons
-    const arrowElements = arrowGroup.selectAll('.arrowhead')
-      .data(links)
-      .enter()
-      .append('polygon')
-      .attr('class', 'arrowhead')
-      .on('click', (event, d) => {
-        event.stopPropagation();
-        this.selectLink(d.source, d.target);
-      });
+    // Render chevron arrowheads as filled polygons (inside each link-container)
+    const arrowElements = linkContainers.append('polygon')
+      .attr('class', 'arrowhead');
 
     // Create/update HTML cards
     this.updateCards(observations);
@@ -476,10 +468,10 @@ export class Visualization {
     d3.selectAll('.link-container').classed('selected', false);
     d3.selectAll('.arrowhead').classed('selected', false);
     d3.selectAll('.link-container')
-      .filter(d => d.source.id === fromId && d.target.id === toId)
+      .filter(d => d.source === fromId && d.target === toId)
       .classed('selected', true);
     d3.selectAll('.arrowhead')
-      .filter(d => d.source.id === fromId && d.target.id === toId)
+      .filter(d => d.source === fromId && d.target === toId)
       .classed('selected', true);
 
     this.workspace.detailPanel.open('link', { from: fromId, to: toId });
