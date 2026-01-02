@@ -152,14 +152,11 @@ export class Visualization {
     const elkGraph = {
       id: "root",
       layoutOptions: {
-        'elk.algorithm': 'layered',
-        'elk.direction': 'DOWN',
-        'elk.spacing.nodeNode': '100',
-        'elk.layered.spacing.nodeNodeBetweenLayers': '150',
-        'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
-        'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
-        'elk.layered.cycleBreaking.strategy': 'GREEDY',
-        'elk.layered.considerModelOrder.strategy': 'PREFER_EDGES'
+        'elk.algorithm': 'disco',
+        'elk.disco.componentCompaction.componentLayoutAlgorithm': 'stress',
+        'elk.spacing.nodeNode': '150',
+        'elk.stress.desiredEdgeLength': '300',
+        'elk.stress.dimension': 'TWO_DIMENSIONAL'
       },
       children: observations.map(obs => ({
         id: obs.id.toString(),
@@ -182,13 +179,35 @@ export class Visualization {
       nodeMap.set(child.id, { x: child.x + child.width / 2, y: child.y + child.height / 2 });
     });
 
+    const padding = 100;
     observations.forEach(obs => {
       const pos = nodeMap.get(obs.id.toString());
       if (pos) {
-        obs.x = pos.x + 100; // Add padding
-        obs.y = pos.y + 100;
+        obs.x = pos.x + padding;
+        obs.y = pos.y + padding;
       }
     });
+
+    // Calculate bounds and resize canvas
+    if (observations.length > 0) {
+      const xs = observations.map(obs => obs.x);
+      const ys = observations.map(obs => obs.y);
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      // Add padding around the diagram
+      const cardWidth = 180;
+      const cardHeight = 120;
+      this.width = Math.max(2000, maxX - minX + cardWidth + padding * 2);
+      this.height = Math.max(2000, maxY - minY + cardHeight + padding * 2);
+
+      // Update SVG and cards container dimensions
+      this.svg.attr('width', this.width).attr('height', this.height);
+      this.cardsContainer.style.width = `${this.width}px`;
+      this.cardsContainer.style.height = `${this.height}px`;
+    }
   }
 
   updateVisualization(observations, links, linkElements1, linkElements2, arrowElements) {
