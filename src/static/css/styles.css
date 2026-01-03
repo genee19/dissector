@@ -237,27 +237,44 @@ body {
 .workspace-header {
     background: var(--glass-bg);
     border-bottom: 1px solid var(--glass-border);
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 0;
     display: flex;
-    gap: var(--spacing-lg);
-    align-items: center;
+    gap: 0;
+    align-items: stretch;
     backdrop-filter: blur(10px);
+}
+
+.btn#back-to-selector {
+    border: 0 none;
+    border-radius: 0;
+    background-color: transparent;
+    backdrop-filter: none;
+    padding: var(--spacing-md);
 }
 
 .project-metadata {
     display: flex;
-    gap: var(--spacing-md);
+    flex-direction: column;
+    gap: 0;
     flex: 1;
+}
+
+.editable-field, .like-editable-field {
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--color-text);
+    font-family: inherit;
 }
 
 .editable-field {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    color: var(--color-text);
-    font-family: inherit;
     transition: all var(--transition-fast);
+}
+
+.project-metadata .editable-field {
+    border-radius: 0;
+    background: none;
 }
 
 .editable-field:focus {
