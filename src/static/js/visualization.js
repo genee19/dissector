@@ -154,9 +154,9 @@ export class Visualization {
       layoutOptions: {
         'elk.algorithm': 'disco',
         'elk.disco.componentCompaction.componentLayoutAlgorithm': 'stress',
-        'elk.spacing.nodeNode': '150',
-        'elk.stress.desiredEdgeLength': '300',
-        'elk.stress.dimension': 'TWO_DIMENSIONAL'
+        'elk.spacing.nodeNode': '500',
+        'elk.stress.desiredEdgeLength': '320',
+        'elk.stress.dimension': 'XY'
       },
       children: observations.map(obs => ({
         id: obs.id.toString(),

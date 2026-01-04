@@ -255,8 +255,18 @@ body {
 .project-metadata {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: calc(var(--spacing-md)/2);
     flex: 1;
+    padding: calc(var(--spacing-md)/2);
+}
+
+.blended-editable-field, .blended-editable-field:focus, .blended-editable-field:focus-visible {
+    appearance: none;
+    padding: 0;
+    border: 0 none;
+    background: none;
+    color: inherit;
+    outline: 0 none;
 }
 
 .editable-field, .like-editable-field {
